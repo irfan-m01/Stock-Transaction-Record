@@ -105,13 +105,60 @@ SELECT * FROM transactions;
  
  
  
-Join Query (User + Stock + Transactions) 
  
-SELECT u.name, s.stock_name, t.transaction_type, t.quantity, t.transaction_date 
-FROM transactions t 
-JOIN user u ON t.user_id = u.user_id 
-JOIN stock s ON t.stock_id = s.stock_id; 
-
+9.5 TRANSACTION MANAGEMENT (BUY OPERATION) 
+ 
+The BUY operation must insert a transaction record and update the portfolio table in a single transaction. 
+ 
+START TRANSACTION; 
+ 
+INSERT INTO transactions(user_id, stock_id, transaction_type, quantity, transaction_date) 
+VALUES (1,1,’BUY’,10,CURDATE()); 
+ 
+INSERT INTO portfolio(user_id, stock_id, total_quantity) 
+VALUES (1,1,10) 
+ON DUPLICATE KEY UPDATE 
+Total_quantity = total_quantity + 10; 
+ 
+COMMIT; 
+ 
+Explanation: 
+If both the INSERT and UPDATE statements are successful, the transaction is committed and changes are saved permanently. 
+ 
+ 
+ 
+ 
+9.6 TRANSACTION MANAGEMENT (SELL OPERATION) 
+ 
+Before selling a stock, the system must verify whether the user has sufficient quantity available in the portfolio. 
+ 
+START TRANSACTION; 
+ 
+SELECT total_quantity  
+FROM portfolio  
+WHERE user_id = 1 AND stock_id = 1 
+FOR UPDATE; 
+ 
+If the available quantity is greater than or equal to the selling quantity, then: 
+ 
+INSERT INTO transactions(user_id, stock_id, transaction_type, quantity, transaction_date) 
+VALUES (1,1,’SELL’,5,CURDATE()); 
+ 
+UPDATE portfolio 
+SET total_quantity = total_quantity – 5 
+WHERE user_id = 1 AND stock_id = 1; 
+ 
+COMMIT; 
+If sufficient quantity is not available: 
+ 
+ROLLBACK; 
+ 
+Explanation: 
+The ROLLBACK command cancels all changes made during the transaction if the user does not have enough stock to sell. This ensures data consistency. 
+ 
+ 
+ 
+ 
 9.7 ADVANCED QUERIES 
  
 GROUP BY Query 
@@ -154,8 +201,8 @@ JOIN stock s ON t.stock_id = s.stock_id;
 Display View 
 SELECT * FROM TransactionReport; 
 
- 
 
  
  
+
 
