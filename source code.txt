@@ -1,0 +1,117 @@
+9.2.1 User Table 
+CREATE TABLE user ( 
+    User_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Name VARCHAR(50) NOT NULL, 
+    Email VARCHAR(50) UNIQUE NOT NULL, 
+    Phone VARCHAR(15) NOT NULL 
+); 
+ 
+Explanation: 
+This table stores user information. The user_id uniquely identifies each user. 
+ 
+ 
+ 
+9.2.2 Stock Table 
+CREATE TABLE stock ( 
+    Stock_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Stock_name VARCHAR(50) NOT NULL, 
+    Symbol VARCHAR(10) UNIQUE NOT NULL, 
+    Price DECIMAL(10,2) NOT NULL 
+); 
+Explanation: 
+This table stores stock details such as stock name, symbol, and price. 
+ 
+ 
+ 
+9.2.3 Transactions Table 
+CREATE TABLE transactions ( 
+    Transaction_id INT PRIMARY KEY AUTO_INCREMENT, 
+    User_id INT, 
+    Stock_id INT, 
+    Transaction_type ENUM(‘BUY’,’SELL’) NOT NULL, 
+    Quantity INT NOT NULL, 
+    Transaction_date DATE NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES user(user_id), 
+    FOREIGN KEY (stock_id) REFERENCES stock(stock_id) 
+); 
+Explanation: 
+This table stores buy and sell transaction records. 
+The transaction_type field specifies whether the operation is BUY or SELL. 
+ 
+ 
+9.2.4 Portfolio Table 
+ 
+CREATE TABLE portfolio ( 
+    Portfolio_id INT PRIMARY KEY AUTO_INCREMENT, 
+    User_id INT, 
+    Stock_id INT, 
+    Total_quantity INT NOT NULL, 
+    UNIQUE(user_id, stock_id), 
+    FOREIGN KEY (user_id) REFERENCES user(user_id), 
+    FOREIGN KEY (stock_id) REFERENCES stock(stock_id) 
+); 
+ 
+Explanation: 
+This table stores the current stock balance of each user. 
+The UNIQUE constraint ensures that a user can have only one record per stock. 
+ 
+ 
+ 
+ 
+9.3 DATA INSERTION 
+ 
+Insert into User Table 
+ 
+INSERT INTO user(name,email,phone) 
+VALUES  
+(‘Irfan Maniyar’,’irfan@gmail.com’,’9876543210’), 
+(‘Subham Mahanty’,’subham088@gmail.com’,’9899143210’), 
+(‘Divya Tripathi’,’darkshadow04@gmail.com’,’8882143210’), 
+(‘Arpit Mishra’,’arpit01@gmail.com’,’9871243210’), 
+(‘Neev Sabban’,’neev03@gmail.com’,’7113438810’); 
+ 
+ 
+ 
+ 
+Insert into Stock Table 
+ 
+INSERT INTO stock(stock_name,symbol,price) 
+VALUES 
+(‘TCS’,’TCS’,3500), 
+(‘Infosys’,’INFY’,1500); 
+ 
+ 
+ 
+9.4 DATA RETRIEVAL QUERIES 
+ 
+View all users 
+ 
+SELECT * FROM user; 
+ 
+ 
+ 
+ 
+View all stocks 
+ 
+SELECT * FROM stock; 
+ 
+ 
+ 
+ 
+View all transactions 
+ 
+SELECT * FROM transactions; 
+ 
+ 
+ 
+ 
+Join Query (User + Stock + Transactions) 
+ 
+SELECT u.name, s.stock_name, t.transaction_type, t.quantity, t.transaction_date 
+FROM transactions t 
+JOIN user u ON t.user_id = u.user_id 
+JOIN stock s ON t.stock_id = s.stock_id; 
+ 
+
+ 
+ 
