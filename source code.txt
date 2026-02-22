@@ -111,7 +111,51 @@ SELECT u.name, s.stock_name, t.transaction_type, t.quantity, t.transaction_date
 FROM transactions t 
 JOIN user u ON t.user_id = u.user_id 
 JOIN stock s ON t.stock_id = s.stock_id; 
+
+9.7 ADVANCED QUERIES 
+ 
+GROUP BY Query 
+ 
+SELECT stock_id, SUM(quantity) AS TotalShares 
+FROM transactions 
+GROUP BY stock_id; 
+ 
+ 
+ 
+HAVING Clause 
+ 
+SELECT stock_id, SUM(quantity) AS TotalShares 
+FROM transactions 
+GROUP BY stock_id 
+HAVING SUM(quantity) > 5; 
+ 
+ 
+ 
+ 
+Subquery 
+ 
+SELECT name 
+FROM user 
+WHERE user_id IN ( 
+    SELECT user_id 
+    FROM transactions 
+    WHERE quantity > 5 
+); 
+ 
+ 
+ 
+9.8 VIEW CREATION 
+ 
+CREATE VIEW TransactionReport AS 
+SELECT u.name, s.stock_name, t.transaction_type, t.quantity 
+FROM transactions t 
+JOIN user u ON t.user_id = u.user_id 
+JOIN stock s ON t.stock_id = s.stock_id; 
+Display View 
+SELECT * FROM TransactionReport; 
+
  
 
  
  
+
