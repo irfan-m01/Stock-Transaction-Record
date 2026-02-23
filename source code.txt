@@ -1,4 +1,4 @@
-9.2.1 User Table 
+
 CREATE TABLE user ( 
     User_id INT PRIMARY KEY AUTO_INCREMENT, 
     Name VARCHAR(50) NOT NULL, 
@@ -6,24 +6,20 @@ CREATE TABLE user (
     Phone VARCHAR(15) NOT NULL 
 ); 
  
-Explanation: 
-This table stores user information. The user_id uniquely identifies each user. 
+
  
  
- 
-9.2.2 Stock Table 
+
 CREATE TABLE stock ( 
     Stock_id INT PRIMARY KEY AUTO_INCREMENT, 
     Stock_name VARCHAR(50) NOT NULL, 
     Symbol VARCHAR(10) UNIQUE NOT NULL, 
     Price DECIMAL(10,2) NOT NULL 
 ); 
-Explanation: 
-This table stores stock details such as stock name, symbol, and price. 
+
  
  
- 
-9.2.3 Transactions Table 
+
 CREATE TABLE transactions ( 
     Transaction_id INT PRIMARY KEY AUTO_INCREMENT, 
     User_id INT, 
@@ -34,13 +30,8 @@ CREATE TABLE transactions (
     FOREIGN KEY (user_id) REFERENCES user(user_id), 
     FOREIGN KEY (stock_id) REFERENCES stock(stock_id) 
 ); 
-Explanation: 
-This table stores buy and sell transaction records. 
-The transaction_type field specifies whether the operation is BUY or SELL. 
- 
- 
-9.2.4 Portfolio Table 
- 
+
+
 CREATE TABLE portfolio ( 
     Portfolio_id INT PRIMARY KEY AUTO_INCREMENT, 
     User_id INT, 
@@ -51,17 +42,8 @@ CREATE TABLE portfolio (
     FOREIGN KEY (stock_id) REFERENCES stock(stock_id) 
 ); 
  
-Explanation: 
-This table stores the current stock balance of each user. 
-The UNIQUE constraint ensures that a user can have only one record per stock. 
  
- 
- 
- 
-9.3 DATA INSERTION 
- 
-Insert into User Table 
- 
+
 INSERT INTO user(name,email,phone) 
 VALUES  
 (‘Irfan Maniyar’,’irfan@gmail.com’,’9876543210’), 
@@ -72,9 +54,7 @@ VALUES
  
  
  
- 
-Insert into Stock Table 
- 
+
 INSERT INTO stock(stock_name,symbol,price) 
 VALUES 
 (‘TCS’,’TCS’,3500), 
@@ -82,34 +62,20 @@ VALUES
  
  
  
-9.4 DATA RETRIEVAL QUERIES 
- 
-View all users 
+
  
 SELECT * FROM user; 
  
  
  
- 
-View all stocks 
- 
 SELECT * FROM stock; 
  
- 
- 
- 
-View all transactions 
  
 SELECT * FROM transactions; 
  
  
  
- 
- 
-9.5 TRANSACTION MANAGEMENT (BUY OPERATION) 
- 
-The BUY operation must insert a transaction record and update the portfolio table in a single transaction. 
- 
+
 START TRANSACTION; 
  
 INSERT INTO transactions(user_id, stock_id, transaction_type, quantity, transaction_date) 
@@ -122,16 +88,10 @@ Total_quantity = total_quantity + 10;
  
 COMMIT; 
  
-Explanation: 
-If both the INSERT and UPDATE statements are successful, the transaction is committed and changes are saved permanently. 
+
  
  
- 
- 
-9.6 TRANSACTION MANAGEMENT (SELL OPERATION) 
- 
-Before selling a stock, the system must verify whether the user has sufficient quantity available in the portfolio. 
- 
+
 START TRANSACTION; 
  
 SELECT total_quantity  
@@ -149,19 +109,12 @@ SET total_quantity = total_quantity – 5
 WHERE user_id = 1 AND stock_id = 1; 
  
 COMMIT; 
-If sufficient quantity is not available: 
- 
+
 ROLLBACK; 
  
-Explanation: 
-The ROLLBACK command cancels all changes made during the transaction if the user does not have enough stock to sell. This ensures data consistency. 
+
  
- 
- 
- 
-9.7 ADVANCED QUERIES 
- 
-GROUP BY Query 
+
  
 SELECT stock_id, SUM(quantity) AS TotalShares 
 FROM transactions 
@@ -169,7 +122,7 @@ GROUP BY stock_id;
  
  
  
-HAVING Clause 
+
  
 SELECT stock_id, SUM(quantity) AS TotalShares 
 FROM transactions 
@@ -177,9 +130,7 @@ GROUP BY stock_id
 HAVING SUM(quantity) > 5; 
  
  
- 
- 
-Subquery 
+
  
 SELECT name 
 FROM user 
@@ -190,9 +141,7 @@ WHERE user_id IN (
 ); 
  
  
- 
-9.8 VIEW CREATION 
- 
+
 CREATE VIEW TransactionReport AS 
 SELECT u.name, s.stock_name, t.transaction_type, t.quantity 
 FROM transactions t 
@@ -204,5 +153,6 @@ SELECT * FROM TransactionReport;
 
  
  
+
 
 
