@@ -99,7 +99,7 @@ FROM portfolio
 WHERE user_id = 1 AND stock_id = 1 
 FOR UPDATE; 
  
-If the available quantity is greater than or equal to the selling quantity, then: 
+
  
 INSERT INTO transactions(user_id, stock_id, transaction_type, quantity, transaction_date) 
 VALUES (1,1,’SELL’,5,CURDATE()); 
@@ -153,6 +153,7 @@ SELECT * FROM TransactionReport;
 
  
  
+
 
 
 
