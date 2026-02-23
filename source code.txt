@@ -1,159 +1,114 @@
+USE stock_db;
 
-CREATE TABLE user ( 
-    User_id INT PRIMARY KEY AUTO_INCREMENT, 
-    Name VARCHAR(50) NOT NULL, 
-    Email VARCHAR(50) UNIQUE NOT NULL, 
-    Phone VARCHAR(15) NOT NULL 
-); 
- 
-
- 
- 
-
-CREATE TABLE stock ( 
-    Stock_id INT PRIMARY KEY AUTO_INCREMENT, 
-    Stock_name VARCHAR(50) NOT NULL, 
-    Symbol VARCHAR(10) UNIQUE NOT NULL, 
-    Price DECIMAL(10,2) NOT NULL 
-); 
-
- 
- 
-
-CREATE TABLE transactions ( 
-    Transaction_id INT PRIMARY KEY AUTO_INCREMENT, 
-    User_id INT, 
-    Stock_id INT, 
-    Transaction_type ENUM(‘BUY’,’SELL’) NOT NULL, 
-    Quantity INT NOT NULL, 
-    Transaction_date DATE NOT NULL, 
-    FOREIGN KEY (user_id) REFERENCES user(user_id), 
-    FOREIGN KEY (stock_id) REFERENCES stock(stock_id) 
-); 
-
-
-CREATE TABLE portfolio ( 
-    Portfolio_id INT PRIMARY KEY AUTO_INCREMENT, 
-    User_id INT, 
-    Stock_id INT, 
-    Total_quantity INT NOT NULL, 
-    UNIQUE(user_id, stock_id), 
-    FOREIGN KEY (user_id) REFERENCES user(user_id), 
-    FOREIGN KEY (stock_id) REFERENCES stock(stock_id) 
-); 
- 
- 
+--------------------------------------------------
+-- INSERT USERS (Fixed Quotes)
+--------------------------------------------------
 
 INSERT INTO user(name,email,phone) 
 VALUES  
-(‘Irfan Maniyar’,’irfan@gmail.com’,’9876543210’), 
-(‘Subham Mahanty’,’subham088@gmail.com’,’9899143210’), 
-(‘Divya Tripathi’,’darkshadow04@gmail.com’,’8882143210’), 
-(‘Arpit Mishra’,’arpit01@gmail.com’,’9871243210’), 
-(‘Neev Sabban’,’neev03@gmail.com’,’7113438810’); 
- 
- 
- 
+('Irfan Maniyar','irfan@gmail.com','9876543210'), 
+('Subham Mahanty','subham088@gmail.com','9899143210'), 
+('Divya Tripathi','darkshadow04@gmail.com','8882143210'), 
+('Arpit Mishra','arpit01@gmail.com','9871243210'), 
+('Neev Sabban','neev03@gmail.com','7113438810'); 
+
+--------------------------------------------------
+-- INSERT STOCKS (Fixed Quotes)
+--------------------------------------------------
 
 INSERT INTO stock(stock_name,symbol,price) 
 VALUES 
-(‘TCS’,’TCS’,3500), 
-(‘Infosys’,’INFY’,1500); 
- 
- 
- 
+('TCS','TCS',3500), 
+('Infosys','INFY',1500); 
 
- 
-SELECT * FROM user; 
- 
- 
- 
-SELECT * FROM stock; 
- 
- 
-SELECT * FROM transactions; 
- 
- 
- 
+--------------------------------------------------
+-- CHECK DATA
+--------------------------------------------------
+
+SELECT * FROM user;
+SELECT * FROM stock;
+SELECT * FROM transactions;
+
+--------------------------------------------------
+-- BUY TRANSACTION
+--------------------------------------------------
 
 START TRANSACTION; 
- 
+
 INSERT INTO transactions(user_id, stock_id, transaction_type, quantity, transaction_date) 
-VALUES (1,1,’BUY’,10,CURDATE()); 
- 
+VALUES (1,1,'BUY',10,CURDATE()); 
+
 INSERT INTO portfolio(user_id, stock_id, total_quantity) 
 VALUES (1,1,10) 
 ON DUPLICATE KEY UPDATE 
-Total_quantity = total_quantity + 10; 
- 
-COMMIT; 
- 
+total_quantity = total_quantity + 10; 
 
- 
- 
+COMMIT;
+
+--------------------------------------------------
+-- SELL TRANSACTION
+--------------------------------------------------
 
 START TRANSACTION; 
- 
+
 SELECT total_quantity  
 FROM portfolio  
 WHERE user_id = 1 AND stock_id = 1 
 FOR UPDATE; 
- 
 
- 
 INSERT INTO transactions(user_id, stock_id, transaction_type, quantity, transaction_date) 
-VALUES (1,1,’SELL’,5,CURDATE()); 
- 
+VALUES (1,1,'SELL',5,CURDATE()); 
+
 UPDATE portfolio 
-SET total_quantity = total_quantity – 5 
+SET total_quantity = total_quantity - 5 
 WHERE user_id = 1 AND stock_id = 1; 
- 
-COMMIT; 
 
-ROLLBACK; 
- 
+COMMIT;
 
- 
+--------------------------------------------------
+-- AGGREGATE QUERIES (Correct BUY/SELL Calculation)
+--------------------------------------------------
 
- 
-SELECT stock_id, SUM(quantity) AS TotalShares 
-FROM transactions 
-GROUP BY stock_id; 
- 
- 
- 
+-- Correct Net Shares Calculation
+SELECT stock_id,
+       SUM(CASE 
+              WHEN transaction_type = 'BUY' THEN quantity
+              WHEN transaction_type = 'SELL' THEN -quantity
+           END) AS NetShares
+FROM transactions
+GROUP BY stock_id;
 
- 
-SELECT stock_id, SUM(quantity) AS TotalShares 
-FROM transactions 
-GROUP BY stock_id 
-HAVING SUM(quantity) > 5; 
- 
- 
+--------------------------------------------------
 
- 
+SELECT stock_id,
+       SUM(CASE 
+              WHEN transaction_type = 'BUY' THEN quantity
+              WHEN transaction_type = 'SELL' THEN -quantity
+           END) AS NetShares
+FROM transactions
+GROUP BY stock_id
+HAVING NetShares > 5;
+
+--------------------------------------------------
+-- SUBQUERY
+--------------------------------------------------
+
 SELECT name 
 FROM user 
 WHERE user_id IN ( 
     SELECT user_id 
     FROM transactions 
     WHERE quantity > 5 
-); 
- 
- 
+);
 
-CREATE VIEW TransactionReport AS 
+--------------------------------------------------
+-- VIEW
+--------------------------------------------------
+
+CREATE OR REPLACE VIEW TransactionReport AS 
 SELECT u.name, s.stock_name, t.transaction_type, t.quantity 
 FROM transactions t 
 JOIN user u ON t.user_id = u.user_id 
 JOIN stock s ON t.stock_id = s.stock_id; 
-Display View 
-SELECT * FROM TransactionReport; 
 
-
- 
- 
-
-
-
-
+SELECT * FROM TransactionReport;
